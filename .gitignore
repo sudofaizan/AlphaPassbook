@@ -11,3 +11,14 @@ captcha_token.txt
 slots_result.json
 .env
 .env.*
+
+# Local scripts not part of AlphaPassbook app
+check_slots*.py
+check_slots.sh
+book.sh
+createoppointment.sh
+showopppointment.sh
+showslotsbylocation.sh
+viewallapplicationdetails.sh
+curl.sh
+run.bat
