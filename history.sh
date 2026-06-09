@@ -1,0 +1,17 @@
+curl 'https://api1.passportindia.gov.in/v1/secure/appointmenthistory' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: en-US,en;q=0.9' \
+  -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJOQVRJT05BTFBTMTMiLCJhdWQiOiJPbmxpbmUtQ2l0aXplbi1BcGkiLCJuYmYiOjE3ODEwMTUyNTIsImlzcyI6Imh0dHBzOi8vd3d3LnBhc3Nwb3J0aW5kaWEuZ292LmluL3BzcCIsInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3ODEwMjk2NTIsImlhdCI6MTc4MTAxNTI1MiwianRpIjoiMTkxMDA1MzEyNzkyMzcyMiJ9.Or-1s9Mh88UgqmsePBxsRIhLhx97XDC95HIREoeVSvL7o-JAUK3LNUiMkmTjK6mr3VZgURq--CkRelfgp96FS12E4ktYsY6FY467wodI7O9IEU2DWHxPJUzNblaZfKkxmHHvPqX0Vud-6OXG82Yyh_BQdoT1Az3gKGIV1pXKOYo-z29b11SdRdNjpnMjGnVPVx5oJVz4v8DM5QtNKyfqYreYB2mWlz0Kdvw8QnzMMTe5vu79EgG8wbYe0yyOX9-F8NvhCBGejhuJBXefZp6qGJofkheXhTprwhWQRpOUX6vazRIO2h0w5b-F5BhsZfsaY5uLFFye8XAtAZ_YpNSkVQ' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json;charset=UTF-8' \
+  -H 'Origin: https://services1.passportindia.gov.in' \
+  -H 'Referer: https://services1.passportindia.gov.in/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-site' \
+  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36' \
+  -H 'sec-ch-ua: "Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'x-aim-plugin-installed: true' \
+  --data-raw '{"requestResponseMap":{"appRefNo":"26-0065836197]]]"}}'

@@ -53,6 +53,7 @@ HEADERS_TEMPLATE = {
 
 class JobStatus(str, Enum):
     RUNNING = "running"
+    PAUSED = "paused"
     SUCCESS = "success"
     KILLED = "killed"
     TIMEOUT = "timeout"
@@ -168,19 +169,41 @@ class LogBroadcaster:
 
 broadcaster = LogBroadcaster()
 jobs: dict[str, JobState] = {}
+global_paused = False
+
+APP_REF_PATTERN = re.compile(r"^\d{2}-\d{10}$")
+DATE_PATTERN = re.compile(r"^\d{2}/\d{2}/\d{4}$")
+
+
+def extract_booking_details(result: dict | None) -> dict[str, str]:
+    rm = (result or {}).get("requestResponseMap") or {}
+    return {
+        "appointment_no": str(rm.get("appointmentNo") or ""),
+        "allocated_date": str(rm.get("apptDate") or ""),
+        "slot_time": str(rm.get("slotTime") or ""),
+        "psk_name": str(rm.get("pskName") or ""),
+        "app_name": str(rm.get("appName") or ""),
+    }
 
 
 def job_summary(state: JobState) -> dict:
     cfg = state.config
+    status = state.status.value
+    if status == JobStatus.RUNNING.value and global_paused:
+        status = JobStatus.PAUSED.value
+    details = extract_booking_details(state.success_result)
+    target_dates = sorted({w.cal_appt_date for w in cfg.workers})
     return {
         "job_id": state.job_id,
         "label": cfg.label or cfg.workers[0].app_ref_no if cfg.workers else "—",
-        "status": state.status.value,
+        "status": status,
         "workers": len(cfg.workers),
         "app_ref_no": cfg.workers[0].app_ref_no if cfg.workers else "",
+        "target_dates": target_dates,
         "started_at": datetime.fromtimestamp(state.started_at).strftime("%Y-%m-%d %H:%M:%S"),
         "elapsed_s": round(time.time() - state.started_at, 1),
         "success": state.success_result,
+        **details,
     }
 
 
@@ -196,7 +219,7 @@ async def book_appointment(token: str, app_ref_no: str, pbo_id: int | str, cal_a
             "enquiryQuota": "",
             "appTask": "Schedule",
             "appointmentQuota": "Online",
-            "calendarDisplayFlag": "N",
+            "calendarDisplayFlag": "Y",
             "calApptDate": cal_appt_date,
             "pboId": str(pbo_id),
         }
@@ -227,6 +250,11 @@ async def worker_loop(job: JobState, spec: WorkerSpec, worker_idx: int) -> None:
     attempt = 0
 
     while not job.stop_event.is_set():
+        while global_paused and not job.stop_event.is_set():
+            await asyncio.sleep(0.25)
+        if job.stop_event.is_set():
+            break
+
         if time.time() - job.started_at >= job.config.close_after:
             await broadcaster.log(
                 f"[{tag}] Timeout reached ({job.config.close_after}s)",
@@ -268,10 +296,13 @@ async def worker_loop(job: JobState, spec: WorkerSpec, worker_idx: int) -> None:
             return
 
         if kind == "success":
-            appt = (result.get("requestResponseMap") or {}).get("appointmentNo", "?")
+            details = extract_booking_details(result)
+            appt = details["appointment_no"] or "?"
+            allocated = details["allocated_date"] or "—"
+            slot = details["slot_time"] or "—"
             msg = (result.get("requestResponseMap") or {}).get("appMesg", "")
             await broadcaster.log(
-                f"[{tag}] BOOKED! Appointment #{appt} — {msg}",
+                f"[{tag}] BOOKED! Appt #{appt} · Allocated {allocated} · Slot {slot} — {msg}",
                 level="success",
                 job_id=job.job_id,
                 data=result,
@@ -400,6 +431,109 @@ def _configs_from_entries(entries: list, token: str) -> list[JobConfig]:
     return configs
 
 
+def validate_date_string(date_str: str) -> bool:
+    s = format_date_for_api(str(date_str).strip())
+    if not DATE_PATTERN.match(s):
+        return False
+    try:
+        datetime.strptime(s, "%d/%m/%Y")
+    except ValueError:
+        return False
+    return True
+
+
+def validate_yaml_data(data: Any) -> tuple[list[JobConfig], list[dict], list[str]]:
+    """Return (configs, preview_rows, errors). Non-empty errors means invalid."""
+    errors: list[str] = []
+
+    if data is None:
+        return [], [], ["Empty YAML"]
+
+    if not isinstance(data, (dict, list)):
+        return [], [], ["Invalid YAML: root must be a mapping or list of jobs"]
+
+    try:
+        configs = build_config_from_yaml(data)
+    except Exception as exc:
+        return [], [], [f"Invalid YAML: {exc}"]
+
+    if isinstance(data, dict) and not data.get("jobs") and "app_ref_no" not in data:
+        nested = [v for v in data.values() if isinstance(v, dict) and "app_ref_no" in v]
+        if not nested and "token" in data and not configs:
+            errors.append("Invalid YAML: no jobs found — expected a top-level 'jobs' list")
+
+    token = ""
+    entries: list[dict] = []
+    if isinstance(data, dict):
+        token = str(data.get("token") or "").strip()
+        if "jobs" in data:
+            raw_entries = data["jobs"]
+            if not isinstance(raw_entries, list):
+                errors.append("Invalid YAML: 'jobs' must be a list")
+                raw_entries = []
+            entries = [e for e in raw_entries if isinstance(e, dict)]
+        elif "app_ref_no" in data:
+            entries = [data]
+        else:
+            entries = [v for v in data.values() if isinstance(v, dict) and "app_ref_no" in v]
+    elif isinstance(data, list):
+        entries = [e for e in data if isinstance(e, dict)]
+
+    if not entries:
+        errors.append("Invalid YAML: no job entries found")
+
+    preview: list[dict] = []
+    for idx, entry in enumerate(entries, start=1):
+        prefix = f"Job #{idx}"
+        job_errors: list[str] = []
+        app_ref = str(entry.get("app_ref_no") or "").strip()
+        if not app_ref:
+            job_errors.append(f"{prefix}: missing 'app_ref_no'")
+        elif not APP_REF_PATTERN.match(app_ref):
+            job_errors.append(f"{prefix}: invalid app_ref_no '{app_ref}' (expected e.g. 26-0065836197)")
+
+        entry_token = str(entry.get("token") or token or "").strip()
+        if not entry_token:
+            job_errors.append(f"{prefix}: missing bearer token (top-level 'token' or per-job 'token')")
+
+        dates = entry.get("dateTotry") or entry.get("dates") or []
+        if not isinstance(dates, list) or not dates:
+            job_errors.append(f"{prefix}: 'dateTotry' must be a non-empty list of dates")
+        else:
+            for d in dates:
+                if not validate_date_string(str(d)):
+                    job_errors.append(f"{prefix}: invalid date '{d}' (use DD/MM/YYYY)")
+
+        pbo_ids = entry.get("pboId") or entry.get("pbo_ids") or []
+        if not isinstance(pbo_ids, list) or not pbo_ids:
+            job_errors.append(f"{prefix}: 'pboId' must be a non-empty list")
+
+        if job_errors:
+            errors.extend(job_errors)
+            continue
+
+        formatted_dates = [format_date_for_api(str(d)) for d in dates]
+        worker_count = len(pbo_ids) * len(formatted_dates)
+        preview.append(
+            {
+                "app_ref_no": app_ref,
+                "dates": formatted_dates,
+                "pbo_ids": [str(p) for p in pbo_ids],
+                "workers": worker_count,
+                "delay": parse_duration(entry.get("delay", "0.5s")),
+                "close_after": parse_duration(entry.get("closejobafter") or entry.get("close_after", "400s")),
+            }
+        )
+
+    if errors:
+        return [], preview, errors
+
+    if not configs:
+        return [], preview, ["Invalid YAML: no runnable jobs could be built from the file"]
+
+    return configs, preview, []
+
+
 # ── API models ──────────────────────────────────────────────────────────────
 
 class StartJobRequest(BaseModel):
@@ -500,39 +634,61 @@ async def start_job(req: StartJobRequest, request: Request):
     return {"job_id": job_id, "status": "started"}
 
 
+@app.post("/api/jobs/parse-yaml")
+async def parse_yaml(req: YamlJobRequest, request: Request):
+    require_auth(request)
+    try:
+        data = yaml.safe_load(req.yaml_content)
+    except yaml.YAMLError as exc:
+        return {"valid": False, "error": "Invalid YAML", "details": [str(exc)]}
+    configs, preview, errors = validate_yaml_data(data)
+    if errors:
+        return {"valid": False, "error": "Invalid YAML", "details": errors}
+    total_workers = sum(row["workers"] for row in preview)
+    return {
+        "valid": True,
+        "preview": preview,
+        "job_count": len(preview),
+        "total_workers": total_workers,
+        "configs_ready": len(configs),
+    }
+
+
 @app.post("/api/jobs/import-yaml")
 async def import_yaml(req: YamlJobRequest, request: Request):
     require_auth(request)
-    data = yaml.safe_load(req.yaml_content)
-    if not data:
-        return {"error": "Empty YAML"}
-    configs = build_config_from_yaml(data)
-    if not configs:
-        return {"error": "No valid jobs found in YAML"}
+    try:
+        data = yaml.safe_load(req.yaml_content)
+    except yaml.YAMLError as exc:
+        return {"error": "Invalid YAML", "details": [str(exc)]}
+    configs, preview, errors = validate_yaml_data(data)
+    if errors:
+        return {"error": "Invalid YAML", "details": errors}
     started = []
     for cfg in configs:
         jid = str(uuid.uuid4())[:8]
         asyncio.create_task(run_job(cfg, preassigned_id=jid))
         started.append(jid)
-    return {"job_ids": started, "count": len(started)}
+    return {"job_ids": started, "count": len(started), "preview": preview}
 
 
 @app.post("/api/jobs/import-yaml-file")
 async def import_yaml_file(request: Request, file: UploadFile = File(...)):
     require_auth(request)
     content = (await file.read()).decode("utf-8")
-    data = yaml.safe_load(content)
-    if not data:
-        return {"error": "Empty YAML"}
-    configs = build_config_from_yaml(data)
-    if not configs:
-        return {"error": "No valid jobs found in YAML"}
+    try:
+        data = yaml.safe_load(content)
+    except yaml.YAMLError as exc:
+        return {"error": "Invalid YAML", "details": [str(exc)]}
+    configs, preview, errors = validate_yaml_data(data)
+    if errors:
+        return {"error": "Invalid YAML", "details": errors}
     started = []
     for cfg in configs:
         jid = str(uuid.uuid4())[:8]
         asyncio.create_task(run_job(cfg, preassigned_id=jid))
         started.append(jid)
-    return {"job_ids": started, "count": len(started)}
+    return {"job_ids": started, "count": len(started), "preview": preview}
 
 
 @app.post("/api/jobs/{job_id}/kill")
@@ -553,6 +709,31 @@ async def kill_all_jobs(request: Request):
             await kill_job(jid)
             killed.append(jid)
     return {"killed": killed}
+
+
+@app.post("/api/jobs/pause-all")
+async def pause_all_jobs(request: Request):
+    require_auth(request)
+    global global_paused
+    global_paused = True
+    paused = [
+        jid
+        for jid, state in jobs.items()
+        if state.status == JobStatus.RUNNING and not state.stop_event.is_set()
+    ]
+    await broadcaster.log(f"All jobs PAUSED ({len(paused)} active)", level="warn")
+    await notify_jobs_update()
+    return {"paused": paused, "count": len(paused)}
+
+
+@app.post("/api/jobs/resume-all")
+async def resume_all_jobs(request: Request):
+    require_auth(request)
+    global global_paused
+    global_paused = False
+    await broadcaster.log("All jobs RESUMED", level="info")
+    await notify_jobs_update()
+    return {"resumed": True}
 
 
 @app.websocket("/ws/logs")

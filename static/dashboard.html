@@ -509,11 +509,151 @@
     }
 
     .status-pill.running { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 240, 255, 0.1); }
+    .status-pill.paused { border-color: var(--warn); color: var(--warn); background: rgba(255, 170, 0, 0.1); }
     .status-pill.success { border-color: var(--success); color: var(--success); background: rgba(0, 255, 136, 0.1); }
     .status-pill.killed, .status-pill.timeout { border-color: var(--muted); color: var(--muted); }
     .status-pill.auth_error { border-color: var(--error); color: var(--error); background: rgba(255, 34, 85, 0.1); }
 
-    .actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .job-success-detail {
+      color: var(--success);
+      font-size: 0.72rem;
+      margin-top: 0.35rem;
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 6px rgba(0, 255, 136, 0.35);
+    }
+
+    .btn-warn {
+      background: rgba(255, 170, 0, 0.1);
+      color: var(--warn);
+      border-color: rgba(255, 170, 0, 0.45);
+      font-size: 0.65rem;
+      padding: 0.4rem 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .btn-warn:hover {
+      background: rgba(255, 170, 0, 0.22);
+      box-shadow: 0 0 12px rgba(255, 170, 0, 0.25);
+    }
+
+    .success-banner {
+      display: none;
+      margin-bottom: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid var(--success);
+      clip-path: var(--clip);
+      box-shadow: 0 0 24px rgba(0, 255, 136, 0.2);
+    }
+
+    .success-banner.show { display: block; }
+
+    .success-banner h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      color: var(--success);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    .success-banner p {
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .success-banner .dismiss {
+      margin-top: 0.65rem;
+      background: transparent;
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      color: var(--success);
+      padding: 0.35rem 0.75rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 2, 8, 0.82);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      clip-path: var(--clip);
+      padding: 1.5rem;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .modal h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+    }
+
+    .modal-errors {
+      background: rgba(255, 34, 85, 0.08);
+      border: 1px solid rgba(255, 34, 85, 0.35);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      color: var(--error);
+      font-size: 0.78rem;
+      line-height: 1.6;
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .preview-table th,
+    .preview-table td {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .preview-table th {
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .preview-summary {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
     .toast {
       position: fixed;
@@ -564,6 +704,12 @@
       </div>
     </header>
 
+    <div class="success-banner" id="successBanner">
+      <h3>✓ APPOINTMENT CONFIRMED</h3>
+      <p id="successBannerText"></p>
+      <button class="dismiss" id="dismissBannerBtn">DISMISS</button>
+    </div>
+
     <div class="grid">
       <div class="card">
         <h2>Manual Deploy</h2>
@@ -609,7 +755,9 @@
         </div>
         <input type="file" id="yamlFile" accept=".yaml,.yml" />
         <div class="actions-row">
-          <button class="btn btn-secondary" id="importYamlBtn" style="flex:1">UPLOAD &amp; EXECUTE</button>
+          <button class="btn btn-secondary" id="importYamlBtn" style="flex:1">REVIEW YAML</button>
+          <button class="btn btn-warn" id="pauseAllBtn">PAUSE ALL</button>
+          <button class="btn btn-secondary" id="resumeAllBtn" style="display:none">RESUME ALL</button>
           <button class="btn btn-danger" id="killAllBtn">KILL ALL</button>
         </div>
         <div class="jobs-list" id="jobsList"></div>
@@ -633,6 +781,17 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="modal-overlay" id="yamlModal">
+    <div class="modal">
+      <h3>// YAML REVIEW</h3>
+      <div id="yamlModalBody"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="yamlCancelBtn">CANCEL</button>
+        <button class="btn btn-primary" id="yamlApproveBtn" style="width:auto;margin-top:0" disabled>APPROVE &amp; EXECUTE</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const terminal = document.getElementById('terminal');
     const activeCountEl = document.getElementById('activeCount');
@@ -644,6 +803,8 @@
 
     let ws = null;
     let yamlContent = null;
+    let yamlPreviewValid = false;
+    let globalPaused = false;
 
     const fetchOpts = { credentials: 'include' };
 
@@ -674,6 +835,29 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    function showSuccessBanner(entry) {
+      const rm = (entry.data && entry.data.requestResponseMap) || {};
+      const appt = rm.appointmentNo || '—';
+      const date = rm.apptDate || '—';
+      const slot = rm.slotTime || '—';
+      const office = rm.pskName || '—';
+      const name = [rm.appName, rm.appSurName].filter(Boolean).join(' ').trim() || '—';
+      const banner = document.getElementById('successBanner');
+      const text = document.getElementById('successBannerText');
+      text.innerHTML = `
+        <strong>${escapeHtml(name)}</strong><br>
+        Appointment <strong>#${escapeHtml(appt)}</strong><br>
+        Allocated date: <strong>${escapeHtml(date)}</strong> · Slot: <strong>${escapeHtml(slot)}</strong><br>
+        Office: ${escapeHtml(office)}
+      `;
+      banner.classList.add('show');
+      showToast(`BOOKED · ${date} · #${appt}`, 'success');
+    }
+
+    document.getElementById('dismissBannerBtn').addEventListener('click', () => {
+      document.getElementById('successBanner').classList.remove('show');
+    });
+
     function appendLog(entry) {
       if (entry.type === 'jobs_update') {
         updateJobs(entry.jobs, entry.active_count);
@@ -688,6 +872,10 @@
       html += `<span class="msg">${escapeHtml(entry.message)}</span>`;
       line.innerHTML = html;
       terminal.appendChild(line);
+
+      if (entry.level === 'success' && entry.message && entry.message.includes('BOOKED!')) {
+        showSuccessBanner(entry);
+      }
 
       if (entry.data) {
         const pre = document.createElement('div');
@@ -705,22 +893,37 @@
       return d.innerHTML;
     }
 
+    function updatePauseControls(paused) {
+      globalPaused = paused;
+      document.getElementById('pauseAllBtn').style.display = paused ? 'none' : 'inline-flex';
+      document.getElementById('resumeAllBtn').style.display = paused ? 'inline-flex' : 'none';
+    }
+
     function updateJobs(jobs, count) {
       activeCountEl.textContent = count;
       pulseDot.classList.toggle('idle', count === 0);
+      updatePauseControls(jobs.some(j => j.status === 'paused'));
 
       jobsList.innerHTML = jobs.length === 0
         ? '<p style="color:var(--muted);font-size:0.8rem;letter-spacing:0.1em">NO ACTIVE OPS</p>'
-        : jobs.map(j => `
+        : jobs.map(j => {
+          const targets = (j.target_dates || []).join(', ') || '—';
+          const successLine = j.status === 'success' && j.allocated_date
+            ? `<div class="job-success-detail">✓ Allocated ${escapeHtml(j.allocated_date)}${j.slot_time ? ' · ' + escapeHtml(j.slot_time) : ''}${j.appointment_no ? ' · #' + escapeHtml(j.appointment_no) : ''}</div>`
+            : '';
+          const canKill = j.status === 'running' || j.status === 'paused';
+          return `
           <div class="job-item">
             <div class="job-meta">
               <div class="id">${j.job_id}</div>
-              <div class="detail">${j.label} · ${j.workers} threads · ${j.elapsed_s}s</div>
+              <div class="detail">${j.label} · ${j.workers} threads · targets: ${escapeHtml(targets)} · ${j.elapsed_s}s</div>
+              ${successLine}
             </div>
             <span class="status-pill ${j.status}">${j.status}</span>
-            ${j.status === 'running' ? `<button class="btn btn-danger" onclick="killJob('${j.job_id}')">KILL</button>` : ''}
+            ${canKill ? `<button class="btn btn-danger" onclick="killJob('${j.job_id}')">KILL</button>` : ''}
           </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
     function connectWs() {
@@ -804,11 +1007,89 @@
       reader.readAsText(file);
     }
 
+    const yamlModal = document.getElementById('yamlModal');
+    const yamlModalBody = document.getElementById('yamlModalBody');
+    const yamlApproveBtn = document.getElementById('yamlApproveBtn');
+
+    function closeYamlModal() {
+      yamlModal.classList.remove('show');
+      yamlPreviewValid = false;
+      yamlApproveBtn.disabled = true;
+    }
+
+    function renderYamlPreview(data) {
+      if (!data.valid) {
+        const details = (data.details || [data.error || 'Invalid YAML']).map(d => `<li>${escapeHtml(d)}</li>`).join('');
+        yamlModalBody.innerHTML = `
+          <div class="modal-errors">
+            <strong>Invalid YAML</strong>
+            <ul style="margin:0.5rem 0 0 1rem">${details}</ul>
+          </div>
+        `;
+        yamlApproveBtn.disabled = true;
+        yamlPreviewValid = false;
+        return;
+      }
+
+      const rows = (data.preview || []).map(row => `
+        <tr>
+          <td>${escapeHtml(row.app_ref_no)}</td>
+          <td>${escapeHtml((row.dates || []).join(', '))}</td>
+          <td>${escapeHtml((row.pbo_ids || []).join(', '))}</td>
+          <td>${row.workers}</td>
+          <td>${row.delay}s</td>
+          <td>${row.close_after}s</td>
+        </tr>
+      `).join('');
+
+      yamlModalBody.innerHTML = `
+        <p class="preview-summary">${data.job_count} job(s) · ${data.total_workers} parallel worker(s) ready to deploy</p>
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th>App Ref</th>
+              <th>Dates</th>
+              <th>PBO IDs</th>
+              <th>Workers</th>
+              <th>Delay</th>
+              <th>Timeout</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      yamlApproveBtn.disabled = false;
+      yamlPreviewValid = true;
+    }
+
+    document.getElementById('yamlCancelBtn').addEventListener('click', closeYamlModal);
+    yamlModal.addEventListener('click', (e) => {
+      if (e.target === yamlModal) closeYamlModal();
+    });
+
     document.getElementById('importYamlBtn').addEventListener('click', async () => {
       if (!yamlContent) {
         showToast('NO YAML PAYLOAD DETECTED', 'error');
         return;
       }
+      try {
+        const res = await fetch('/api/jobs/parse-yaml', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ yaml_content: yamlContent }),
+        });
+        const data = await res.json();
+        renderYamlPreview(data);
+        yamlModal.classList.add('show');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    yamlApproveBtn.addEventListener('click', async () => {
+      if (!yamlContent || !yamlPreviewValid) return;
+      yamlApproveBtn.disabled = true;
       try {
         const res = await fetch('/api/jobs/import-yaml', {
           method: 'POST',
@@ -817,10 +1098,15 @@
           body: JSON.stringify({ yaml_content: yamlContent }),
         });
         const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        if (data.error) {
+          const detail = (data.details || []).join('; ');
+          throw new Error(detail ? `${data.error}: ${detail}` : data.error);
+        }
+        closeYamlModal();
         showToast(`${data.count} OP(S) DEPLOYED`, 'success');
       } catch (err) {
         showToast(err.message, 'error');
+        yamlApproveBtn.disabled = false;
       }
     });
 
@@ -836,10 +1122,25 @@
     }
     window.killJob = killJob;
 
+    document.getElementById('pauseAllBtn').addEventListener('click', async () => {
+      const res = await fetch('/api/jobs/pause-all', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      updatePauseControls(true);
+      showToast(`${data.count} OP(S) PAUSED`, 'success');
+    });
+
+    document.getElementById('resumeAllBtn').addEventListener('click', async () => {
+      const res = await fetch('/api/jobs/resume-all', { method: 'POST', credentials: 'include' });
+      await res.json();
+      updatePauseControls(false);
+      showToast('ALL OPS RESUMED', 'success');
+    });
+
     document.getElementById('killAllBtn').addEventListener('click', async () => {
       if (!confirm('TERMINATE ALL ACTIVE OPS?')) return;
       const res = await fetch('/api/jobs/kill-all', { method: 'POST', credentials: 'include' });
       const data = await res.json();
+      updatePauseControls(false);
       showToast(`${data.killed.length} OP(S) KILLED`, 'success');
     });
 

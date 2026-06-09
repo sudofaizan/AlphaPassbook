@@ -2,35 +2,12 @@
 # Each job spawns one worker thread per (pboId × date) combination.
 # Example: 2 pboIds × 4 dates = 8 parallel workers.
 
-token: "YOUR_BEARER_TOKEN_HERE"
-
+token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJOQVRJT05BTFBTMTMiLCJhdWQiOiJPbmxpbmUtQ2l0aXplbi1BcGkiLCJuYmYiOjE3ODEwMTMzNjgsImlzcyI6Imh0dHBzOi8vd3d3LnBhc3Nwb3J0aW5kaWEuZ292LmluL3BzcCIsInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3ODEwMjc3NjgsImlhdCI6MTc4MTAxMzM2OCwianRpIjoiNTE1NTY1NzAwODMzNjc1OSJ9.inWWkcnlK6-6Gtylqgl4WFh9-f3Aq3MDzP4R0O2TF8DsR0Ty6uJlFq0Zi9cN-I61DJTBWGqdVrkQZsz1VEHDzFXkaZFCazA9C3sHmP8i4zbkKhi3nif3oAbBQcQkQRXh0AWPDW_3n_ySwxLN-XIOgujIUR4VBVb2u50XGdii_Ll4xc7EDjR7mzp0PbKXSlGuUmHgG5jgq-omMhsyxnFsxOAgDfPU-9XDAq2M1nPMppny3AkjHHzRjEKHLln8Fn1QMjVA2vf3reL1QzonnUwyJEpw5HVhk1iSNAg4qgVTxWAOyaJHLdl6LBlZ5EZFOPYtROI9UY0sdtZ742-_U16POQ"
 jobs:
-  - app_ref_no: "25-0054608322"
-    dateTotry:
-      - "28/08/2026"
-      - "26/08/2026"
-      - "22/08/2026"
-      - "21/08/2026"
-      - "18/08/2026"
-    pboId:
-      - 6
-      - 209
-    delay: 0.2s
-    closejobafter: 400s
-
   - app_ref_no: "26-0065836197"
     dateTotry:
-      - "08/06/2026"
-      - "09/06/2026"
       - "10/06/2026"
-      - "12/06/2026"
-      - "13/06/2026"
-      - "14/06/2026"
-      - "15/06/2026"
-      - "16/06/2026"
-      - "17/06/2026"
-      - "18/06/2026"
     pboId:
-      - 209
-    delay: 0.5s
+      - 6
+    delay: 0.2s
     closejobafter: 400s
