@@ -1,0 +1,36 @@
+# Standard job format for Passport Booking Dashboard
+# Each job spawns one worker thread per (pboId × date) combination.
+# Example: 2 pboIds × 4 dates = 8 parallel workers.
+
+token: "YOUR_BEARER_TOKEN_HERE"
+
+jobs:
+  - app_ref_no: "25-0054608322"
+    dateTotry:
+      - "28/08/2026"
+      - "26/08/2026"
+      - "22/08/2026"
+      - "21/08/2026"
+      - "18/08/2026"
+    pboId:
+      - 6
+      - 209
+    delay: 0.2s
+    closejobafter: 400s
+
+  - app_ref_no: "26-0065836197"
+    dateTotry:
+      - "08/06/2026"
+      - "09/06/2026"
+      - "10/06/2026"
+      - "12/06/2026"
+      - "13/06/2026"
+      - "14/06/2026"
+      - "15/06/2026"
+      - "16/06/2026"
+      - "17/06/2026"
+      - "18/06/2026"
+    pboId:
+      - 209
+    delay: 0.5s
+    closejobafter: 400s

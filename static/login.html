@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlphaPassbook // ACCESS GATE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050508;
+      --surface: rgba(12, 8, 24, 0.9);
+      --border: rgba(0, 255, 255, 0.3);
+      --text: #e8f4ff;
+      --muted: #7a8fa8;
+      --cyan: #00f0ff;
+      --magenta: #ff00aa;
+      --error: #ff2255;
+      --glow-cyan: 0 0 30px rgba(0, 240, 255, 0.35);
+      --clip: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    .glow {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(130px);
+      pointer-events: none;
+    }
+    .glow.cyan { top: -150px; left: 50%; transform: translateX(-50%); background: rgba(0, 240, 255, 0.1); }
+    .glow.magenta { bottom: -200px; left: 20%; background: rgba(255, 0, 170, 0.08); }
+
+    .login-wrap {
+      position: relative;
+      z-index: 1;
+      width: min(420px, 92vw);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, var(--cyan), var(--magenta));
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: grid;
+      place-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #000;
+      box-shadow: var(--glow-cyan);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: var(--glow-cyan); }
+      50% { box-shadow: 0 0 40px rgba(255, 0, 170, 0.4); }
+    }
+
+    .brand h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--cyan), #fff, var(--magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand p {
+      margin-top: 0.5rem;
+      font-size: 0.72rem;
+      color: var(--cyan);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      clip-path: var(--clip);
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+
+    .card h2::before { content: '// '; color: var(--cyan); }
+
+    .form-group { margin-bottom: 1.1rem; }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid var(--border);
+      padding: 0.8rem 1rem;
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input::placeholder { color: rgba(122, 143, 168, 0.45); }
+
+    input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.85rem;
+      border: 1px solid var(--cyan);
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(255, 0, 170, 0.12));
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      text-shadow: 0 0 8px var(--cyan);
+      box-shadow: var(--glow-cyan);
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.28), rgba(255, 0, 170, 0.2));
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.45);
+    }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error {
+      margin-top: 1rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid rgba(255, 34, 85, 0.5);
+      background: rgba(255, 34, 85, 0.1);
+      color: var(--error);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      display: none;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .error.show { display: block; }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow cyan"></div>
+  <div class="glow magenta"></div>
+
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="logo-icon">αP</div>
+      <h1>AlphaPassbook</h1>
+      <p>Secure Access Terminal</p>
+    </div>
+
+    <div class="card">
+      <h2>Authenticate</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Operator ID</label>
+          <input type="text" id="username" placeholder="AlphaPassbook" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Access Key</label>
+          <input type="password" id="password" placeholder="••••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn" id="loginBtn">▶ ENTER SYSTEM</button>
+        <div class="error" id="errorMsg">ACCESS DENIED — INVALID CREDENTIALS</div>
+      </form>
+    </div>
+
+    <div class="footer">AUTHORIZED PERSONNEL ONLY</div>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    fetch('/api/auth/check').then(r => r.json()).then(d => {
+      if (d.authenticated) window.location.href = '/dashboard';
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('errorMsg');
+      err.classList.remove('show');
+      btn.disabled = true;
+      btn.textContent = 'AUTHENTICATING...';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+        window.location.href = '/dashboard';
+      } catch {
+        err.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = '▶ ENTER SYSTEM';
+      }
+    });
+  </script>
+</body>
+</html>

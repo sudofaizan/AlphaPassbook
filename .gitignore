@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.claude/
+
+# Secrets & runtime data
+bearer_token.txt
+captcha_token.txt
+slots_result.json
+.env
+.env.*

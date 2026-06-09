@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlphaPassbook // CYBER OPS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050508;
+      --bg2: #0a0612;
+      --surface: rgba(12, 8, 24, 0.85);
+      --surface2: rgba(18, 10, 36, 0.9);
+      --border: rgba(0, 255, 255, 0.25);
+      --border-hot: rgba(255, 0, 128, 0.5);
+      --text: #e8f4ff;
+      --muted: #7a8fa8;
+      --cyan: #00f0ff;
+      --magenta: #ff00aa;
+      --yellow: #ffe600;
+      --success: #00ff88;
+      --warn: #ffaa00;
+      --error: #ff2255;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4), 0 0 40px rgba(0, 240, 255, 0.15);
+      --glow-magenta: 0 0 20px rgba(255, 0, 170, 0.4);
+      --terminal-bg: #020204;
+      --clip: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid + scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.15) 2px,
+        rgba(0, 0, 0, 0.15) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    .bg-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-glow.cyan { top: -200px; left: -100px; background: rgba(0, 240, 255, 0.08); }
+    .bg-glow.magenta { bottom: -200px; right: -100px; background: rgba(255, 0, 170, 0.08); }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--cyan), var(--magenta));
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: grid;
+      place-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: -0.05em;
+      box-shadow: var(--glow-cyan);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: var(--glow-cyan); }
+      50% { box-shadow: var(--glow-magenta); }
+    }
+
+    .brand h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--cyan), #fff, var(--magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .brand h1::after {
+      content: 'ALPHAPASSBOOK';
+      position: absolute;
+      left: 2px;
+      top: 0;
+      background: linear-gradient(90deg, var(--magenta), transparent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      animation: glitch 4s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% { opacity: 0; transform: translate(0); }
+      91% { opacity: 0.7; transform: translate(-3px, 1px); }
+      93% { opacity: 0; transform: translate(3px, -1px); }
+      95% { opacity: 0.5; transform: translate(-2px, 0); }
+    }
+
+    .brand .tagline {
+      font-size: 0.72rem;
+      color: var(--cyan);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+      opacity: 0.8;
+    }
+
+    .active-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      clip-path: var(--clip);
+      padding: 0.6rem 1.25rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .active-badge strong {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px var(--cyan);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-logout {
+      background: rgba(255, 34, 85, 0.08);
+      border: 1px solid rgba(255, 34, 85, 0.35);
+      color: var(--error);
+      padding: 0.5rem 0.9rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 34, 85, 0.2);
+      box-shadow: 0 0 12px rgba(255, 34, 85, 0.3);
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success), 0 0 16px var(--success);
+      animation: pulse 1.5s infinite;
+    }
+
+    .pulse-dot.idle {
+      background: var(--muted);
+      box-shadow: none;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ── Grid layout ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      clip-path: var(--clip);
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--cyan), var(--magenta));
+      opacity: 0.6;
+    }
+
+    .card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    }
+
+    .card h2::before { content: '// '; color: var(--magenta); }
+
+    .form-group { margin-bottom: 1rem; }
+
+    label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      padding: 0.7rem 0.9rem;
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    input::placeholder { color: rgba(122, 143, 168, 0.5); }
+
+    input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3), inset 0 0 12px rgba(0, 240, 255, 0.05);
+    }
+
+    input[type="date"] { color-scheme: dark; }
+
+    .date-hint {
+      font-size: 0.72rem;
+      color: var(--magenta);
+      margin-top: 0.35rem;
+      letter-spacing: 0.05em;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border: 1px solid;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(255, 0, 170, 0.15));
+      border-color: var(--cyan);
+      color: var(--cyan);
+      width: 100%;
+      margin-top: 0.5rem;
+      text-shadow: 0 0 8px var(--cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(255, 0, 170, 0.2));
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .btn-danger {
+      background: rgba(255, 34, 85, 0.1);
+      color: var(--error);
+      border-color: rgba(255, 34, 85, 0.4);
+      font-size: 0.65rem;
+      padding: 0.4rem 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 34, 85, 0.25);
+      box-shadow: 0 0 12px rgba(255, 34, 85, 0.3);
+    }
+
+    .yaml-zone {
+      border: 1px dashed var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 0.75rem;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      background: rgba(0, 240, 255, 0.02);
+    }
+
+    .yaml-zone:hover, .yaml-zone.dragover {
+      border-color: var(--magenta);
+      background: rgba(255, 0, 170, 0.05);
+      box-shadow: inset 0 0 20px rgba(255, 0, 170, 0.1);
+    }
+
+    .yaml-zone p { color: var(--muted); font-size: 0.82rem; }
+    .yaml-zone strong { color: var(--magenta); text-shadow: 0 0 8px var(--magenta); }
+
+    #yamlFile { display: none; }
+
+    .terminal-section { margin-top: 1.5rem; }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .terminal-header h2 { margin-bottom: 0; }
+
+    .ws-status {
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .ws-status.connected { color: var(--success); text-shadow: 0 0 8px var(--success); }
+
+    .terminal {
+      background: var(--terminal-bg);
+      border: 1px solid var(--border);
+      height: 400px;
+      overflow-y: auto;
+      padding: 1rem 1.25rem;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      scroll-behavior: smooth;
+      box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.03);
+    }
+
+    .terminal::before {
+      content: '> NEURAL_LINK :: STREAM_ACTIVE';
+      display: block;
+      color: var(--magenta);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.75rem;
+      opacity: 0.6;
+    }
+
+    .log-line { margin-bottom: 0.2rem; word-break: break-all; }
+    .log-line .ts { color: #3a4a5a; }
+    .log-line .job { color: var(--magenta); text-shadow: 0 0 6px rgba(255, 0, 170, 0.4); }
+    .log-line.info .msg { color: var(--text); }
+    .log-line.success .msg { color: var(--success); text-shadow: 0 0 8px rgba(0, 255, 136, 0.5); }
+    .log-line.warn .msg { color: var(--warn); }
+    .log-line.error .msg { color: var(--error); text-shadow: 0 0 8px rgba(255, 34, 85, 0.5); }
+
+    .log-data {
+      margin: 0.25rem 0 0.5rem 1.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(0, 240, 255, 0.03);
+      border-left: 2px solid var(--cyan);
+      color: var(--muted);
+      font-size: 0.7rem;
+      white-space: pre-wrap;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .jobs-list { margin-top: 1rem; }
+
+    .job-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+      gap: 0.75rem;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .job-meta { flex: 1; min-width: 0; }
+    .job-meta .id {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 6px var(--cyan);
+    }
+    .job-meta .detail { color: var(--muted); font-size: 0.7rem; margin-top: 0.2rem; }
+
+    .status-pill {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      padding: 0.25rem 0.55rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+
+    .status-pill.running { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 240, 255, 0.1); }
+    .status-pill.success { border-color: var(--success); color: var(--success); background: rgba(0, 255, 136, 0.1); }
+    .status-pill.killed, .status-pill.timeout { border-color: var(--muted); color: var(--muted); }
+    .status-pill.auth_error { border-color: var(--error); color: var(--error); background: rgba(255, 34, 85, 0.1); }
+
+    .actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--cyan);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 10000;
+      clip-path: var(--clip);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: var(--error); box-shadow: 0 0 20px rgba(255, 34, 85, 0.4); color: var(--error); }
+    .toast.success { border-color: var(--success); box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); color: var(--success); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background: var(--cyan); opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <div class="bg-glow cyan"></div>
+  <div class="bg-glow magenta"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">αP</div>
+        <div class="brand">
+          <h1>AlphaPassbook</h1>
+          <div class="tagline">Neural Slot Acquisition System</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="active-badge">
+          <div class="pulse-dot idle" id="pulseDot"></div>
+          <span><strong id="activeCount">0</strong> OPS ACTIVE</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">⏻ DISCONNECT</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Manual Deploy</h2>
+        <form id="bookingForm">
+          <div class="form-group">
+            <label for="token">Bearer Token</label>
+            <input type="password" id="token" placeholder="eyJ0eXAiOiJKV1QiLCJ..." required />
+          </div>
+          <div class="form-group">
+            <label for="appRefNo">Application Ref No</label>
+            <input type="text" id="appRefNo" placeholder="25-0054608322" required />
+          </div>
+          <div class="row-2">
+            <div class="form-group">
+              <label for="pboId">PBO ID</label>
+              <input type="text" id="pboId" placeholder="6" required />
+            </div>
+            <div class="form-group">
+              <label for="apptDate">Target Date</label>
+              <input type="date" id="apptDate" required />
+              <div class="date-hint" id="dateHint">▸ FORMAT :: DD/MM/YYYY</div>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="form-group">
+              <label for="delay">Retry Interval (s)</label>
+              <input type="number" id="delay" value="0.5" min="0.1" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label for="closeAfter">Auto-Terminate (s)</label>
+              <input type="number" id="closeAfter" value="400" min="10" step="1" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="startBtn">▶ INITIATE BOOKING</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>YAML Payload</h2>
+        <div class="yaml-zone" id="yamlZone">
+          <p>DROP <strong>job.yaml</strong> INTO THE MATRIX</p>
+          <p style="margin-top:0.4rem;font-size:0.72rem;letter-spacing:0.1em">MULTI-APP · MULTI-DATE · MULTI-PBO</p>
+        </div>
+        <input type="file" id="yamlFile" accept=".yaml,.yml" />
+        <div class="actions-row">
+          <button class="btn btn-secondary" id="importYamlBtn" style="flex:1">UPLOAD &amp; EXECUTE</button>
+          <button class="btn btn-danger" id="killAllBtn">KILL ALL</button>
+        </div>
+        <div class="jobs-list" id="jobsList"></div>
+      </div>
+    </div>
+
+    <div class="terminal-section card">
+      <div class="terminal-header">
+        <h2>Live Feed</h2>
+        <div class="ws-status" id="wsStatus">
+          <div class="pulse-dot idle"></div>
+          LINKING...
+        </div>
+      </div>
+      <div class="terminal" id="terminal"></div>
+      <div class="actions-row" style="margin-top:0.75rem">
+        <button class="btn btn-secondary" id="clearLogsBtn">PURGE LOGS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const activeCountEl = document.getElementById('activeCount');
+    const pulseDot = document.getElementById('pulseDot');
+    const wsStatus = document.getElementById('wsStatus');
+    const jobsList = document.getElementById('jobsList');
+    const apptDate = document.getElementById('apptDate');
+    const dateHint = document.getElementById('dateHint');
+
+    let ws = null;
+    let yamlContent = null;
+
+    const fetchOpts = { credentials: 'include' };
+
+    // Auth guard — redirect to login if session expired
+    fetch('/api/auth/check', fetchOpts).then(r => r.json()).then(d => {
+      if (!d.authenticated) window.location.href = '/';
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST', ...fetchOpts });
+      window.location.href = '/';
+    });
+
+    function isoToDisplay(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    apptDate.addEventListener('change', () => {
+      dateHint.textContent = '▸ TARGET :: ' + isoToDisplay(apptDate.value);
+    });
+
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function appendLog(entry) {
+      if (entry.type === 'jobs_update') {
+        updateJobs(entry.jobs, entry.active_count);
+        return;
+      }
+
+      const line = document.createElement('div');
+      line.className = `log-line ${entry.level || 'info'}`;
+
+      let html = `<span class="ts">[${entry.ts}]</span> `;
+      if (entry.job_id) html += `<span class="job">[${entry.job_id}]</span> `;
+      html += `<span class="msg">${escapeHtml(entry.message)}</span>`;
+      line.innerHTML = html;
+      terminal.appendChild(line);
+
+      if (entry.data) {
+        const pre = document.createElement('div');
+        pre.className = 'log-data';
+        pre.textContent = JSON.stringify(entry.data, null, 2);
+        terminal.appendChild(pre);
+      }
+
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function updateJobs(jobs, count) {
+      activeCountEl.textContent = count;
+      pulseDot.classList.toggle('idle', count === 0);
+
+      jobsList.innerHTML = jobs.length === 0
+        ? '<p style="color:var(--muted);font-size:0.8rem;letter-spacing:0.1em">NO ACTIVE OPS</p>'
+        : jobs.map(j => `
+          <div class="job-item">
+            <div class="job-meta">
+              <div class="id">${j.job_id}</div>
+              <div class="detail">${j.label} · ${j.workers} threads · ${j.elapsed_s}s</div>
+            </div>
+            <span class="status-pill ${j.status}">${j.status}</span>
+            ${j.status === 'running' ? `<button class="btn btn-danger" onclick="killJob('${j.job_id}')">KILL</button>` : ''}
+          </div>
+        `).join('');
+    }
+
+    function connectWs() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}/ws/logs`);
+
+      ws.onopen = () => {
+        wsStatus.innerHTML = '<div class="pulse-dot"></div> LINKED';
+        wsStatus.classList.add('connected');
+      };
+
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        appendLog(data);
+      };
+
+      ws.onclose = () => {
+        wsStatus.innerHTML = '<div class="pulse-dot idle"></div> RECONNECTING...';
+        wsStatus.classList.remove('connected');
+        setTimeout(connectWs, 2000);
+      };
+    }
+
+    connectWs();
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+
+      const body = {
+        token: document.getElementById('token').value.trim(),
+        appRefNo: document.getElementById('appRefNo').value.trim(),
+        pboId: document.getElementById('pboId').value.trim(),
+        calApptDate: isoToDisplay(document.getElementById('apptDate').value),
+        delay: parseFloat(document.getElementById('delay').value) || 0.5,
+        closeAfter: parseFloat(document.getElementById('closeAfter').value) || 400,
+      };
+
+      try {
+        const res = await fetch('/api/jobs/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        showToast(`OP ${data.job_id} DEPLOYED`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    const yamlZone = document.getElementById('yamlZone');
+    const yamlFile = document.getElementById('yamlFile');
+
+    yamlZone.addEventListener('click', () => yamlFile.click());
+    yamlZone.addEventListener('dragover', (e) => { e.preventDefault(); yamlZone.classList.add('dragover'); });
+    yamlZone.addEventListener('dragleave', () => yamlZone.classList.remove('dragover'));
+    yamlZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      yamlZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) readYamlFile(file);
+    });
+
+    yamlFile.addEventListener('change', () => {
+      if (yamlFile.files[0]) readYamlFile(yamlFile.files[0]);
+    });
+
+    function readYamlFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        yamlContent = e.target.result;
+        yamlZone.querySelector('p').innerHTML = `LOADED :: <strong>${file.name}</strong>`;
+        showToast(`PAYLOAD: ${file.name}`, 'success');
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById('importYamlBtn').addEventListener('click', async () => {
+      if (!yamlContent) {
+        showToast('NO YAML PAYLOAD DETECTED', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('/api/jobs/import-yaml', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ yaml_content: yamlContent }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        showToast(`${data.count} OP(S) DEPLOYED`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    async function killJob(jobId) {
+      try {
+        const res = await fetch(`/api/jobs/${jobId}/kill`, { method: 'POST', credentials: 'include' });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        showToast(`OP ${jobId} TERMINATED`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    window.killJob = killJob;
+
+    document.getElementById('killAllBtn').addEventListener('click', async () => {
+      if (!confirm('TERMINATE ALL ACTIVE OPS?')) return;
+      const res = await fetch('/api/jobs/kill-all', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      showToast(`${data.killed.length} OP(S) KILLED`, 'success');
+    });
+
+    document.getElementById('clearLogsBtn').addEventListener('click', () => {
+      terminal.innerHTML = '';
+    });
+
+    fetch('/api/jobs', fetchOpts).then(r => {
+      if (r.status === 401) { window.location.href = '/'; return null; }
+      return r.json();
+    }).then(d => { if (d) updateJobs(d.jobs, d.active_count); });
+  </script>
+</body>
+</html>

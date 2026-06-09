@@ -1,0 +1,19 @@
+#!/bin/bash
+curl 'https://api1.passportindia.gov.in/v1/secure/showslotsbylocation' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: en-US,en;q=0.9' \
+  -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJOQVRJT05BTFBTMTIiLCJhdWQiOiJPbmxpbmUtQ2l0aXplbi1BcGkiLCJuYmYiOjE3ODA3NTQ3MTYsImlzcyI6Imh0dHBzOi8vd3d3LnBhc3Nwb3J0aW5kaWEuZ292LmluL3BzcCIsInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3ODA3NjkxMTYsImlhdCI6MTc4MDc1NDcxNiwianRpIjoiNjI0Njk4NDUxNjI4ODA4NyJ9.fQ8FmxtK8PHR4KlnmXcMEvZzcic9aedPJdvFjmMxKrily37McxmFkz0NQR7zfP_ERlRykGiCReZIpk24lCZv8qO7t9FGKM1_w1rjviHa-Pv1tgF-l_aum7PHal5a8VsuDw4h6asuA7YQMyPuV4PwR-WhfNI_RzWp-QPJa5CYsfhd80krDsRRbU8qxtwZm8m7EnXUZuP7uBUWBo-eXlG4vI7qKJpN-gTEA83KhMzQ9U918nNSa7BAam0Ei4v8-dcuw8bcMHNNEAFPsNpRMdgR-k_dVz2UQ9eO8NhxuXS1VN81H5nEeogAZo20bW-ZyhHqi60_0AsnSgSQrtcRjhT7Tw' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json;charset=UTF-8' \
+  -H 'Origin: https://services1.passportindia.gov.in' \
+  -H 'Pragma: no-cache' \
+  -H 'Referer: https://services1.passportindia.gov.in/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-site' \
+  -H 'User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36' \
+  -H 'sec-ch-ua: "Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"' \
+  -H 'sec-ch-ua-mobile: ?1' \
+  -H 'sec-ch-ua-platform: "Android"' \
+  --data-raw '{"requestResponseMap":{"appRefNo":"26-0053409018","enquiryQuota":"","isGOESFlag":"N","appTask":"Schedule","appointmentQuota":"Online","pfcLocation":291,"pboId":"6","token":"0cAFcWeA6XXoNc-VN2A2e35cLTI590BQ86QO08N66rrevZyCdEwBI57E3yvEed1T_SK5rMV1ASIySIGt1dTbYT-CRRFclS_cwRvhnp9GBaczc2Ezv1KzG49W7QTsPSlwUqL7kfpxsLvPj58LA9GpBrtZLjIiavXqyM1YZcw2eE_a1seyyu7SSz4Uhq5mFH6-Lc463M531WD9uk3oqaTNgOSmiSDLF83vmYZe9krFYYOn2jneXyWU66Eh48MKceMLReNMVEpo-YgYW2nK2xn4D5ZucnPa39GqQoQUvipJ8ouu45OHf3MQq9l3Mxz14yTsc8ZvlmCYALOd7bQ18ce2RPaqmwO7a2j3MKWFfSpOgPAL2bwifscHwMGiXDfy6jgNgL9sH9eaVqrTS4RtttXm96GwkaIKww8ewz5nYdkcePBHfu9h_doq6x8xVTnunNRC2BzowUAEu9BB8TSoHvCL65aFX1fabgqo_TXCPxWlwwxRTT12lLFEoA__ZF-rhzwCCgCc3eIpVATGggmUKbN7NsHYGjaLbj0p5aovv2uLbPHC2Bi_V8gia5MnqpEE-4DxCRFYZFUlBjK4Upqp9u8vODZowxE08lk_MDfW5mvq5j25hEnJr2iQm09FEOs24koXbH954bJRnkgwhZK5DqJV99IXgriAR3aM_h1m4gkrNTz37FmU0L3dLcv1S_mvDUomcwTwhVoWC1QHD20PEELNAAyT9Xdd8mG_drihIuk0FgzB8qAE9vmK_cZ5JcgnntxGsoAjpo7X9dDmHwhCBWE4ISp3AiLGI584yF_W58JNT50Hr4IKqTUhCvNtOgxc6Ym08SvWw4Ph7-XA3RMr_Q8YQlzGyNcxl7FQze_suwou40sLSvPApasElI8T6MntOFlQ3zAw9wKt0PfHF8CAg094gMcQy7m3CuXP-to76LXi7EccTZCMt8pi5FOkXa_4oOdBciimhN8HvuBSwDDtiUThrqI17SABR9J5WWDs-ZE0QSQUWpG-tKX3NcUygVv-KPany59S97WndqjX_NeIGJzijnZ6BhSDADibUsOJMjyxxrlgZ14imEKGS7wf8GRCs4dvL1RNEx2nYIIDmZwIwfMlHXBYEn_9JfCYHvta1uwivKSvTbr5OxCyhtJ0zQsXq74W_p-PjZvg-q0fY6ASWbiZ9WdG4zIQrE9qBbzz0z6tziUq5y_2JZuvnZExBmQVMBvpAS--I-HMNer2XHSdR8TLta-vgx6l3ws6dipe0vi-ALgB14_tYIajFx3cAaxRmSVPtVjEAfPr_oYhEO1GuxM5No3kWkz9WPXveqzjApGeYXV37FAUYd6VNsolOaAKhwxW_BF88mgIabYI7-TFvQKeBPfQ1gJB-v__BYiRQGLwbkxeS517eJwoKq4aqgUG-0IoRHbBD2ID9x4uMZrHiOsvSJjgJeNx5_qSmDRsSaId8rTZb1f80Ozp2KtWWAb5eN0w5mW9lUV0cBpKmJUkIAdqHx0hegRa9fKLB9lVX1QzVy3sAmu-kf1U4CmIOPPcv53juqRUXXRjFfx-Qss8Tv38HA5PtG2tJ9FL63-xz3BOi5YVVBE02-nSFi774tcOKU0eQP5kJgajzhAqPGTbCZwhGWEaqIvZcWYAj7nJETleeniUousaP6xYXBtb9YM2kdLYY5CUsPt0qXYp3VFIRNsyiUkQQXy1RzZH3gDDPfq76CyWbFeXqeD20kn3VgVO0XKIYghFop0lxr3riXEx868AbcR5UD-7n3cXFzBPMpcZdfBQOViyJg0ic1VPYJOA_-twdMQueW-1VgNWMGvdQMK42x_FF9W6YTJv1D60z3AaGenm7jReyBuNrafse5_n4JgbZlMmRI9mcKI4Dq0kpB6wERS-NH7SAYiS9wncB-cfmINjw1VAA7T47QcNqrPxzqm-W1HQLMgdvKD41jWoMMo1LO39X1iZTxCfGp65qC55zWCe4vokCfsqIjU-e6Nq69v_9XhvH4FnZYOXT8cCydG_0dgKye0ti0hLOpNeCS8LdhMcinEXA4i_sqwYNusOvVIbfBVTo5VRkbtUxhb-ST-J2e8BjZd13SaK1ujGl1Q09eqPEq_jaOqQGIe9xK3_RDIut-PZyxlAZUKxuPCpfCnYVLJqhDokPKxvgxl6_vQpUmQXRE1xf2mqACDRk"}}'
